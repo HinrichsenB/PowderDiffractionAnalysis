@@ -1,7 +1,4 @@
 import matplotlib.pyplot as plt
-import numpy as np
-import math
-from scipy.signal import find_peaks
 from background import *
 from ReturnPeaks import *
 from computeFOM import *
@@ -15,7 +12,7 @@ from XRDTools import *
 DiffractionPattern = np.loadtxt("Rack4_Sample2_Qz_PDF.xy", delimiter="\t")
 
 # Get the reference patterns
-referencePatterns, referenceIDs = loadReferenceData('ESRF_70kev')
+referencePatterns, referenceIDs = loadReferenceData('testdIs')
 
 # Set the experimental wavelegth
 Wavelength = 0.17714286
@@ -43,13 +40,12 @@ peakIntensities = peakIntensities / maxPeakIntensity
 
 samplePattern = np.array([peak2ThetaList,peakIntensities])
 
-plt.plot(TwoThetaValues, Intensities)
-plt.plot(TwoThetaValues, BackgroundIntensities)
-plt.plot(TwoThetaValues, BackgroudSubtractedIntensities)
-plt.plot(TwoThetaValues[peakIndices], BackgroudSubtractedIntensities[peakIndices], "x")
-plt.show(block=False)
-
 FOMs = returnFOMArray(samplePattern, referencePatterns, Wavelength, maxPositionalDifference, weightingAngle=0.5, weightingIntensity=0.5, weightingPhases=0.5)
 FOMs[np.isnan(FOMs)] = 0
 sortedFOMIndices = np.argsort(FOMs)
 
+plt.plot(TwoThetaValues, Intensities)
+plt.plot(TwoThetaValues, BackgroundIntensities)
+plt.plot(TwoThetaValues, BackgroudSubtractedIntensities)
+plt.plot(TwoThetaValues[peakIndices], BackgroudSubtractedIntensities[peakIndices], "x")
+plt.show(block=True)
