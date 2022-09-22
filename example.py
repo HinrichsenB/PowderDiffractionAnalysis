@@ -1,14 +1,28 @@
 import matplotlib.pyplot as plt
+import numpy as np
 from background import *
 from ReturnPeaks import *
 from computeFOM import *
 from loadReferencePatterns import *
 from XRDTools import *
 
+def get_non_zero_indices(data):
+    res = []
+    for i, datum in enumerate(data):
+        if datum != 0:
+            res.append(i)
+    return res
 
+def cleanup_convert_dIs(dIs, Wavelength):
+    
+    ValidIndices = get_non_zero_indices(dIs[:,1])
+    Intensities = dIs[(ValidIndices),1]
+    DSpacing = dIs[(ValidIndices),0]
+    TwoTheta = returnTwoThetaFromDspacingAndWavelength(DSpacing, Wavelength)
+    
+    return ([TwoTheta,Intensities])
 
 # Get some sample data
-
 DiffractionPattern = np.loadtxt("Rack4_Sample2_Qz_PDF.xy", delimiter="\t")
 
 # Get the reference patterns
@@ -44,8 +58,18 @@ FOMs = returnFOMArray(samplePattern, referencePatterns, Wavelength, maxPositiona
 FOMs[np.isnan(FOMs)] = 0
 sortedFOMIndices = np.argsort(FOMs)
 
-plt.plot(TwoThetaValues, Intensities)
-plt.plot(TwoThetaValues, BackgroundIntensities)
-plt.plot(TwoThetaValues, BackgroudSubtractedIntensities)
-plt.plot(TwoThetaValues[peakIndices], BackgroudSubtractedIntensities[peakIndices], "x")
-plt.show(block=True)
+for i in range(9):
+    plt.figure(i+1) #to let the index start at 1
+    indexOfBestMatch = sortedFOMIndices[len(sortedFOMIndices)-i-1]
+    patternOfBestMatch = referencePatterns[indexOfBestMatch,:,:]
+    IDofBestMatch = referenceIDs[indexOfBestMatch]
+    convertedPatternOfBestMatch = cleanup_convert_dIs(patternOfBestMatch, Wavelength)
+    plt.plot(TwoThetaValues, Intensities)
+    plt.plot(TwoThetaValues, BackgroundIntensities)
+    plt.plot(TwoThetaValues, BackgroudSubtractedIntensities)
+    plt.plot(TwoThetaValues[peakIndices], BackgroudSubtractedIntensities[peakIndices], "x")
+    plt.stem(convertedPatternOfBestMatch[0],(convertedPatternOfBestMatch[1] * maxPeakIntensity))
+    plt.title(IDofBestMatch)
+    plt.show(block=True)
+
+print("Example competed")

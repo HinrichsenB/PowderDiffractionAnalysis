@@ -4,14 +4,15 @@ import math
 
 
 def returnTwoThetaFromDspacingAndWavelength(dSpacings, Wavelength):
+    TwoTheta = np.zeros(len(dSpacings))
     i=0
     for dSpacing  in dSpacings:
-        dSpacings[i] = np.rad2deg( 2*math.asin( Wavelength/( 2*dSpacing )))
+        TwoTheta[i] = np.rad2deg( 2*math.asin( Wavelength/( 2*dSpacing )))
         i+=1
-    return dSpacings
+    return TwoTheta
 
 def returnDspacingFromTwoThetaAndWavelength(AngularValues, Wavelength):
-    DSpacingList = AngularValues
+    DSpacingList = np.zeros(len(AngularValues))
     i=0
     for angularValue  in AngularValues:
         DSpacingList[i] = Wavelength/(2 * math.sin( np.deg2rad( angularValue/2 ) ))
