@@ -51,7 +51,7 @@ if __name__ == "__main__":
         iterations=50,
         sec_iterations=50,
         curvature=0.000001,
-        perc_anchor_pnts=50
+        perc_anchor_pnts=25
     )
 
     # Determine the background subtracted signal
@@ -73,9 +73,9 @@ if __name__ == "__main__":
         samplePattern,
         referencePatterns,
         Wavelength,
-        maxPositionalDifference,
-        weightingAngle=0.5,
-        weightingIntensity=0.5,
+        maxPositionalDifference=0.05,
+        weightingAngle=1,
+        weightingIntensity=0.2,
         weightingPhases=0.5
     )
     FOMs[np.isnan(FOMs)] = 0
@@ -94,7 +94,7 @@ if __name__ == "__main__":
         plt.xlim([0, 10])
         plt.plot(TwoThetaValues, BackgroundIntensities)
         plt.plot(TwoThetaValues, BackgroudSubtractedIntensities)
-        plt.plot(peak2ThetaList, peakIntensities, "x")
+        plt.plot(peak2ThetaList, peakIntensities * maxPeakIntensity, "x")
         plt.stem(convertedPatternOfBestMatch[0], (convertedPatternOfBestMatch[1] * maxPeakIntensity))
         Title = str(IDofBestMatch)  + ", FOM: " + str(FOMOfBestMatch)
         plt.title(Title)
