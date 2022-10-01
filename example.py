@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from background import background
-from ReturnPeaks import returnPeakPositionsAndIntensities
+from ReturnPeaks import returnPeakDetails
 from computeFOM import returnFOMArray
 from loadReferencePatterns import loadReferenceData
 from XRDTools import returnTwoThetaFromDspacingAndWavelength
@@ -32,10 +32,10 @@ def cleanup_convert_dIs(dIs, Wavelength):
 if __name__ == "__main__":
 
     # Get some sample data
-    DiffractionPattern = np.loadtxt("Rack4_Sample2_Qz_PDF.xy", delimiter="\t")
+    DiffractionPattern = np.loadtxt("./data/Rack4_Sample2_Qz_PDF.xy", delimiter="\t")
 
     # Get the reference patterns
-    referencePatterns, referenceIDs = loadReferenceData('testdIs')
+    referencePatterns, referenceIDs = loadReferenceData('./data/testdIs')
 
     # Set the experimental wavelegth
     Wavelength = 0.17714286
@@ -58,12 +58,10 @@ if __name__ == "__main__":
     BackgroudSubtractedIntensities = Intensities - BackgroundIntensities
 
     # Get the peak indices from the pattern
-    PeakIndicesAndIntensities = returnPeakPositionsAndIntensities(
-        BackgroudSubtractedIntensities, maxHeightOfPeaks=0.01, peakWidthInDataPoints=7)
-    peakIndices = PeakIndicesAndIntensities[0,:]
-    peakIndices = peakIndices.astype(int)
-    peak2ThetaList = TwoThetaValues[peakIndices]
-    peakIntensities = PeakIndicesAndIntensities[1,:]
+    peakDetails = returnPeakDetails(TwoThetaValues, BackgroudSubtractedIntensities, maxHeightOfPeaks=0.01, peakWidthInDataPoints=7)
+
+    peak2ThetaList = peakDetails[0] 
+    peakIntensities = peakDetails[1]
 
     # normalize the peak intensities
     maxPeakIntensity = np.max(peakIntensities)
@@ -81,22 +79,25 @@ if __name__ == "__main__":
         weightingPhases=0.5
     )
     FOMs[np.isnan(FOMs)] = 0
-    sortedFOMIndices = np.argsort(FOMs)
+    sortedFOMIndices = np.flip(np.argsort(FOMs))
 
     for i in range(9):
         plt.figure(i + 1) # to let the index start at 1
 
-        indexOfBestMatch = sortedFOMIndices[len(sortedFOMIndices) - i - 1]
+        indexOfBestMatch = sortedFOMIndices[i]
+        FOMOfBestMatch = FOMs[indexOfBestMatch]
         patternOfBestMatch = referencePatterns[indexOfBestMatch,:,:]
         IDofBestMatch = referenceIDs[indexOfBestMatch]
         convertedPatternOfBestMatch = cleanup_convert_dIs(patternOfBestMatch, Wavelength)
-
+        
         plt.plot(TwoThetaValues, Intensities)
+        plt.xlim([0, 10])
         plt.plot(TwoThetaValues, BackgroundIntensities)
         plt.plot(TwoThetaValues, BackgroudSubtractedIntensities)
-        plt.plot(TwoThetaValues[peakIndices], BackgroudSubtractedIntensities[peakIndices], "x")
+        plt.plot(peak2ThetaList, peakIntensities, "x")
         plt.stem(convertedPatternOfBestMatch[0], (convertedPatternOfBestMatch[1] * maxPeakIntensity))
-        plt.title(IDofBestMatch)
+        Title = str(IDofBestMatch)  + ", FOM: " + str(FOMOfBestMatch)
+        plt.title(Title)
         plt.show(block=True)
 
-    print("Example competed")
+    print("Example completed")
