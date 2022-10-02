@@ -43,15 +43,16 @@ if __name__ == "__main__":
 
     Intensities = DiffractionPattern[:,1]
     TwoThetaValues = DiffractionPattern[:,0]
+    maxExperimentalIntensity = np.max(Intensities)
 
     # Determine Background
     BackgroundIntensities = background(
         Intensities,
         TwoThetaValues,
-        iterations=50,
-        sec_iterations=50,
-        curvature=0.000001,
-        perc_anchor_pnts=25
+        iterations=20,
+        sec_iterations=20,
+        curvature=0.0001,
+        perc_anchor_pnts=20
     )
 
     # Determine the background subtracted signal
@@ -94,8 +95,8 @@ if __name__ == "__main__":
         plt.xlim([0, 10])
         plt.plot(TwoThetaValues, BackgroundIntensities)
         plt.plot(TwoThetaValues, BackgroudSubtractedIntensities)
-        plt.plot(peak2ThetaList, peakIntensities * maxPeakIntensity, "x")
-        plt.stem(convertedPatternOfBestMatch[0], (convertedPatternOfBestMatch[1] * maxPeakIntensity))
+        plt.plot(peak2ThetaList, peakIntensities * maxExperimentalIntensity, "x")
+        plt.stem(convertedPatternOfBestMatch[0], (convertedPatternOfBestMatch[1] * maxExperimentalIntensity))
         Title = str(IDofBestMatch)  + ", FOM: " + str(FOMOfBestMatch)
         plt.title(Title)
         plt.show(block=True)
