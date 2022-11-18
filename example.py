@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from background import background
-from computeFOM import returnFOMArray
+from computeFOM import get_FOM_array
 from loadReferencePatterns import loadReferenceData
-from XRDTools import cleanup_convert_dIs, returnPeakDetails
+from XRDTools import cleanup_convert_dIs, get_peak_details
 
 
 if __name__ == "__main__":
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     BackgroudSubtractedIntensities = Intensities - BackgroundIntensities
 
     # Get the peak indices from the pattern
-    peakDetails = returnPeakDetails(TwoThetaValues, BackgroudSubtractedIntensities, maxHeightOfPeaks=0.01, peakWidthInDataPoints=7)
+    peakDetails = get_peak_details(TwoThetaValues, BackgroudSubtractedIntensities, maxHeightOfPeaks=0.01, peakWidthInDataPoints=7)
 
     peak2ThetaList = peakDetails[0]
     peakIntensities = peakDetails[1]
@@ -52,7 +52,7 @@ if __name__ == "__main__":
 
     samplePattern = np.array([peak2ThetaList, peakIntensities])
 
-    FOMs = returnFOMArray(
+    FOMs = get_FOM_array(
         samplePattern,
         referencePatterns,
         Wavelength,
