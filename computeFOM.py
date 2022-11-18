@@ -6,7 +6,7 @@ import numpy as np
 from XRDTools import returnDspacingFromTwoThetaAndWavelength
 
 
-def returnFOMArray(samplePattern, referencePatterns, Wavelength, maxPositionalDifference = 0.05, weightingAngle=0.5, weightingIntensity=0.5, weightingPhases=0.5):
+def returnFOMArray(samplePattern, referencePatterns, Wavelength, maxPositionalDifference=0.05, weightingAngle=0.5, weightingIntensity=0.5, weightingPhases=0.5):
 
     # create an array of maximal positional differences which takes into account wavelength dispersion effects: tan(theta)
     numberOfPeaksInSamplePattern = round(np.size(samplePattern) / 2)
@@ -46,11 +46,10 @@ def returnFOMOfTwoPatterns(sampleDIerrors, referenceDIs, weightingAngle=0.5, wei
     # Create an array to hold the individual peak FOMs
     FOM = np.zeros((numberOfPeaksInReferencePattern + numberOfPeaksInSamplePattern, 4))
 
-
     # run through all experimental peaks and compute the FOM contribution of each peak
     if numberOfPeaksInReferencePattern > 0:
         i = 0
-        while i < numberOfPeaksInSamplePattern-1:
+        while i < numberOfPeaksInSamplePattern - 1:
             positionDifference = np.abs(referenceDIs[:,0] - sampleDIerrors[0,i])
             minDifference = np.argmin(positionDifference)
 

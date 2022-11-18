@@ -2,6 +2,7 @@
 import math
 
 import numpy as np
+from scipy.signal import find_peaks
 
 
 def returnTwoThetaFromDspacingAndWavelength(dSpacings, Wavelength):
@@ -26,3 +27,49 @@ def returnDspacingFromTwoThetaAndWavelength(AngularValues, Wavelength):
         i += 1
 
     return DSpacingList
+
+
+def get_non_zero_indices(data):
+    res = []
+
+    for i, datum in enumerate(data):
+        if datum != 0:
+            res.append(i)
+
+    return res
+
+
+def cleanup_convert_dIs(dIs, Wavelength):
+
+    ValidIndices = get_non_zero_indices(dIs[:,1])
+    Intensities = dIs[(ValidIndices), 1]
+    DSpacing = dIs[(ValidIndices), 0]
+    TwoTheta = returnTwoThetaFromDspacingAndWavelength(DSpacing, Wavelength)
+
+    return ([TwoTheta, Intensities])
+
+
+def returnPeakDetails(TwoThetaValues, intensities, maxHeightOfPeaks, peakWidthInDataPoints):
+
+    peaks, properties = returnPeakIndices(intensities, maxHeightOfPeaks=0.01, peakWidthInDataPoints=7)
+
+    TwoThetaStart = TwoThetaValues[0]
+    TwoThetaStep = TwoThetaValues[1] - TwoThetaValues[0]
+    peakPositionsInTwoTheta = TwoThetaStart + TwoThetaStep * (properties["widths"]/2 + properties["left_ips"])
+    peakIntensities = properties["widths"] * properties["width_heights"]
+    peakWidthsInTwoTheta = TwoThetaStep * properties["widths"]
+
+    return([peakPositionsInTwoTheta, peakIntensities, peakWidthsInTwoTheta])
+
+
+def returnPeakIndices(intensities, maxHeightOfPeaks=0.01, peakWidthInDataPoints=7):
+
+    peaks, properties = find_peaks(
+        intensities,
+        height=maxHeightOfPeaks * np.max(intensities),
+        distance=peakWidthInDataPoints,
+        width=3,
+        prominence=1
+    )
+
+    return peaks, properties
