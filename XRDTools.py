@@ -26,3 +26,14 @@ def returnDspacingFromTwoThetaAndWavelength(AngularValues, Wavelength):
         i += 1
 
     return DSpacingList
+
+def returnTwoThetaFromQAndWavelength(QVector, Wavelength):
+    TwoTheta = np.zeros(len(QVector))
+
+    i = 0
+
+    for QValue  in QVector:
+        TwoTheta[i] = np.rad2deg ( 2 * math.asin( Wavelength * QValue * 0.1 / ( 4 * math.pi )  ))
+        i += 1
+
+    return TwoTheta
