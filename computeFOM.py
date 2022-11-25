@@ -30,7 +30,7 @@ def get_FOM_array(samplePattern, referencePatterns, Wavelength, maxPositionalDif
     numberOfReferencePatterns = len(referencePatterns)
     FOMs = np.zeros(numberOfReferencePatterns)
     i = 0
-    while i < numberOfReferencePatterns -1:
+    while i < numberOfReferencePatterns - 1:
         FOMs[i] = get_patterns_FOM(sampleDIerrors, referencePatterns[i, :, :])
         i += 1
 
