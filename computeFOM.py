@@ -3,10 +3,10 @@ import math
 
 import numpy as np
 
-from XRDTools import returnDspacingFromTwoThetaAndWavelength
+from XRDTools import get_dspacing
 
 
-def returnFOMArray(samplePattern, referencePatterns, Wavelength, maxPositionalDifference = 0.05, weightingAngle=0.5, weightingIntensity=0.5, weightingPhases=0.5):
+def get_FOM_array(samplePattern, referencePatterns, Wavelength, maxPositionalDifference=0.05, weightingAngle=0.5, weightingIntensity=0.5, weightingPhases=0.5):
 
     # create an array of maximal positional differences which takes into account wavelength dispersion effects: tan(theta)
     numberOfPeaksInSamplePattern = round(np.size(samplePattern) / 2)
@@ -14,7 +14,7 @@ def returnFOMArray(samplePattern, referencePatterns, Wavelength, maxPositionalDi
     maxPositionalDifferenceArray[:] = maxPositionalDifference
 
     peak2ThetaList = samplePattern[0, :]
-    peakDSpacingList = returnDspacingFromTwoThetaAndWavelength(peak2ThetaList, Wavelength)
+    peakDSpacingList = get_dspacing(peak2ThetaList, Wavelength)
     peakIntensities = samplePattern[1, :]
 
     i = 0
@@ -30,14 +30,14 @@ def returnFOMArray(samplePattern, referencePatterns, Wavelength, maxPositionalDi
     numberOfReferencePatterns = len(referencePatterns)
     FOMs = np.zeros(numberOfReferencePatterns)
     i = 0
-    while i < numberOfReferencePatterns -1:
-        FOMs[i] = returnFOMOfTwoPatterns(sampleDIerrors, referencePatterns[i, :, :])
+    while i < numberOfReferencePatterns - 1:
+        FOMs[i] = get_patterns_FOM(sampleDIerrors, referencePatterns[i, :, :])
         i += 1
 
     return FOMs
 
 
-def returnFOMOfTwoPatterns(sampleDIerrors, referenceDIs, weightingAngle=0.5, weightingIntensity=0.5, weightingPhases=0.5):
+def get_patterns_FOM(sampleDIerrors, referenceDIs, weightingAngle=0.5, weightingIntensity=0.5, weightingPhases=0.5):
 
     numberOfPeaksInReferencePattern = round(np.shape((np.nonzero(referenceDIs)))[1] / 2)
     referenceDIs = referenceDIs[0:numberOfPeaksInReferencePattern, :]
@@ -46,16 +46,16 @@ def returnFOMOfTwoPatterns(sampleDIerrors, referenceDIs, weightingAngle=0.5, wei
     # Create an array to hold the individual peak FOMs
     FOM = np.zeros((numberOfPeaksInReferencePattern + numberOfPeaksInSamplePattern, 4))
 
-
     # run through all experimental peaks and compute the FOM contribution of each peak
     if numberOfPeaksInReferencePattern > 0:
         i = 0
-        while i < numberOfPeaksInSamplePattern-1:
+
+        while i < numberOfPeaksInSamplePattern - 1:
             positionDifference = np.abs(referenceDIs[:,0] - sampleDIerrors[0,i])
             minDifference = np.argmin(positionDifference)
 
             if positionDifference[minDifference] < sampleDIerrors[2,i]:
-                FOM[i,0:4]=returnPeakFOMS(sampleDIerrors[0:2, i], referenceDIs[minDifference, :])
+                FOM[i,0:4] = get_peak_FOMs(sampleDIerrors[0:2, i], referenceDIs[minDifference, :])
 
             i += 1
 
@@ -72,16 +72,15 @@ def returnFOMOfTwoPatterns(sampleDIerrors, referenceDIs, weightingAngle=0.5, wei
         (FOM.sum(axis=0)[3]) * numberOfAssignedPeaks /
         ((referenceDIs.sum(axis=0)[1]) * numberOfPeaksInReferencePattern)
     )
-    returnFOM = math.sqrt(
+    finalFOM = math.sqrt(
         FOMdb *
         (weightingAngle * FOMTheta + weightingIntensity * FOMIntensity + weightingPhases * FOMph) /
         (weightingAngle + weightingIntensity + weightingPhases)
     )
+    return finalFOM
 
-    return returnFOM
 
-
-def returnPeakFOMS(sampleDI, referenceDI):
+def get_peak_FOMs(sampleDI, referenceDI):
     FOMtheta = abs(sampleDI[0] - referenceDI[0])
     FOMintensity = abs(sampleDI[1] - referenceDI[1])
     return np.array([FOMtheta, FOMintensity, sampleDI[1], referenceDI[1]])
